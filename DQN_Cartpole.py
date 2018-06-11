@@ -157,7 +157,7 @@ def main():
                 dqn.updateTargetModel()
             if done:
                 break
-        header = [episode, totalSteps, total_reward, total_reward / totalSteps]
+        header = [episode, totalSteps, total_reward.data[0].cpu(), total_reward[0].cpu() / totalSteps]
         recordCursor.writerow(header)
 
         if episode % 100 == 0:
@@ -175,7 +175,6 @@ def main():
                         break
             avg_reward = total_reward / TEST
             print('Episode: {} Evaluation Average Reward: {}'.format(episode, avg_reward))
-            dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 
     #env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
     #for i in range(100):
@@ -190,6 +189,6 @@ def main():
     #        if done:
     #            break
     #env.close()
-
+    dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 if __name__ == '__main__':
     main()
