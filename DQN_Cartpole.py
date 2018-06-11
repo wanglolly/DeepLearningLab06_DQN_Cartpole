@@ -165,7 +165,7 @@ def main():
                 state = env.reset()
                 state = torch.from_numpy(state.reshape((-1, 4))).float()
                 for j in range(STEP):
-                    env.render()
+                    #env.render()
                     action = dqn.action(state)
                     state,reward,done,_ = env.step(action[0,0])
                     state = torch.from_numpy(state.reshape((-1, 4))).float()
