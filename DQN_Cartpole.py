@@ -103,7 +103,7 @@ class DQN(nn.Module):
         done_batch = Variable(torch.cat(minibatch.done))
 
         #Q(s,a,theta)
-        state_action_values = self.forward(state_batch).gather(1, action_batch)
+        state_action_values = self.forward(state_batch)
         next_state_values = Variable(torch.zeros(BATCH_SIZE))
         non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
 
