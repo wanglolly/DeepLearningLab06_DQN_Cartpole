@@ -176,19 +176,19 @@ def main():
             print('Episode: {} Evaluation Average Reward: {}'.format(episode, avg_reward))
             dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 
-    env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
-    for i in range(100):
-        state = env.reset()
-        state = torch.from_numpy(state.reshape((-1, 4))).float()
-        for j in range(STEP):
-            env.render()
-            action = dqn.action(state)
-            state, reward, done, _ = env.step(action[0, 0])
-            state = torch.from_numpy(state.reshape((-1, 4))).float()
-            total_reward += reward
-            if done:
-                break
-    env.close()
+    #env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
+    #for i in range(100):
+    #    state = env.reset()
+    #    state = torch.from_numpy(state.reshape((-1, 4))).float()
+    #    for j in range(STEP):
+    #        env.render()
+    #        action = dqn.action(state)
+    #        state, reward, done, _ = env.step(action[0, 0])
+    #        state = torch.from_numpy(state.reshape((-1, 4))).float()
+    #        total_reward += reward
+    #        if done:
+    #            break
+    #env.close()
 
 if __name__ == '__main__':
     main()
