@@ -89,7 +89,7 @@ class DQN(nn.Module):
             self.epsilon *= EPS_DECAY
 
     def action(self,state):
-        return self.forward(Variable(state)).detach().data.max(1)[1]
+        return self.forward(Variable(state)).detach().data.max(1)[1].cpu()
 
     def loss(self):
         if len(self.memory) < BATCH_SIZE:
@@ -137,6 +137,8 @@ def main():
         totalSteps = 0
         for t in range(STEP):
             action = dqn.egreedy_action(state)
+            print(action)
+            print(type(action))
             next_state,reward,done,_ = env.step(action[0,0])
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             reward = torch.Tensor([reward])
