@@ -7,6 +7,7 @@ import random
 import torch.optim as optim
 import gym
 from gym import wrappers
+import csv
 
 torch.set_default_tensor_type('torch.FloatTensor')
 
@@ -16,10 +17,15 @@ EPS_END = 0.01
 EPS_DECAY = 0.995
 REPLAY_SIZE = 5000
 BATCH_SIZE = 128
+TARGETQ_UPDATE = 50
 num_episodes = 1000
 STEP = 200
 TEST = 10
 USE_CUDA = True
+
+recordFileName = './DQN_Reward.csv'
+recordFile = open(recordFileName, 'w')
+recordCursor = csv.writer(recordFile)
 
 def Variable(data, *args, **kwargs):
     if USE_CUDA:
@@ -112,6 +118,13 @@ class DQN(nn.Module):
     def push(self, state, action, next_state, reward, done):
         self.memory.push(state, action, next_state, reward, done)
 
+    def saveModel(self, name):
+        torch.save(self.model.state_dict(), name)
+    
+    def loadModel(self, name):
+        self.model.load_state_dict(torch.load(name))
+        self.updateTargetModel()
+
 def main():
     env = gym.make('CartPole-v0')
     memory = ReplayMemory(REPLAY_SIZE)
@@ -122,6 +135,8 @@ def main():
     for episode in range(num_episodes):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1,4))).float()
+        total_reward = 0
+        totalSteps = 0
         for t in range(STEP):
             action = dqn.egreedy_action(state)
             next_state,reward,done,_ = env.step(action[0,0])
@@ -130,14 +145,20 @@ def main():
             final = torch.LongTensor([done])
             dqn.push(state,action,next_state,reward,final)
             state = next_state
+            total_reward += reward
+            totalSteps += 1
             optimizer.zero_grad()
             loss = dqn.loss()
             if loss is None:
                 continue
             loss.backward()
             optimizer.step()
+            if t % TARGETQ_UPDATE == 0:
+                dqn.updateTargetModel()
             if done:
                 break
+        header = [episode, totalSteps, total_reward, total_reward / totalSteps]
+        recordCursor.writerow(header)
 
         if episode % 100 == 0:
             total_reward = 0
@@ -154,8 +175,7 @@ def main():
                         break
             avg_reward = total_reward / TEST
             print('Episode: {} Evaluation Average Reward: {}'.format(episode, avg_reward))
-            if avg_reward >= 200.0:
-                break
+            dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 
     env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
     for i in range(100):
