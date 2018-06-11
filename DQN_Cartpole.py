@@ -104,12 +104,14 @@ class DQN(nn.Module):
 
         #Q(s,a,theta)
         state_action_values = self.forward(state_batch).max(1)[0].detach()
+        state_action_values = Variable(state_action_values, requires_grad = True)
         next_state_values = Variable(torch.zeros(BATCH_SIZE))
         non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
 
         #max Q(s',a',theta),if s' is a terminal state,return 0
         next_state_values[done_batch == 0] = self.target_forward(non_final_next_states).max(1)[0].detach()
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
+        expected_state_action_values = Variable(expected_state_action_values, requires_grad = True)
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
         return loss
