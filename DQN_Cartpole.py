@@ -110,7 +110,8 @@ class DQN(nn.Module):
         #max Q(s',a',theta),if s' is a terminal state,return 0
         next_state_values[done_batch == 0] = self.target_forward(non_final_next_states).max(1)[0].detach()
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
-        loss = nn.MSELoss(state_action_values, expected_state_action_values)
+        loss = nn.MSELoss()
+        loss = loss(state_action_values, expected_state_action_values)
         return loss
 
     def push(self, state, action, next_state, reward, done):
