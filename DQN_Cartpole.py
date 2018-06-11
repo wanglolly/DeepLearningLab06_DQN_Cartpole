@@ -137,7 +137,7 @@ def main():
         totalSteps = 0
         for t in range(STEP):
             action = dqn.egreedy_action(state)
-            next_state,reward,done,_ = env.step(action[0,0].data[0].cpu())
+            next_state,reward,done,_ = env.step(action[0,0].data.tolist()[0])
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             reward = torch.Tensor([reward])
             final = torch.LongTensor([done])
