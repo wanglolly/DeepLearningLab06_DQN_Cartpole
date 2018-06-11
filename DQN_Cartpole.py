@@ -82,7 +82,7 @@ class DQN(nn.Module):
     #epsilon greedy policy to select action
     def egreedy_action(self,state):
         if random.random() <= self.epsilon:
-            return torch.LongTensor([[random.randrange(self.action_dim)]])
+            return torch.LongTensor([random.randrange(self.action_dim)])
         else:
             return self.action(state)
         if self.epsilon >= EPS_END:
@@ -138,7 +138,7 @@ def main():
         totalSteps = 0
         for t in range(STEP):
             action = dqn.egreedy_action(state)
-            next_state,reward,done,_ = env.step(int(action[0,0].data[0].cpu()))
+            next_state,reward,done,_ = env.step(int(action[0].data[0].cpu()))
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             reward = torch.Tensor([reward])
             final = torch.LongTensor([done])
@@ -167,8 +167,7 @@ def main():
                 for j in range(STEP):
                     #env.render()
                     action = dqn.action(state)
-                    print(action)
-                    state,reward,done,_ = env.step(action[0,0])
+                    state,reward,done,_ = env.step(int(action[0].data[0].cpu()))
                     state = torch.from_numpy(state.reshape((-1, 4))).float()
                     total_reward += reward
                     if done:
