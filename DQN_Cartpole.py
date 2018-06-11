@@ -61,8 +61,6 @@ class DQN(nn.Module):
         self.epsilon = EPS_START
         self.action_dim = env.action_space.n
         self.state_dim =  env.observation_space.shape[0]
-        print(self.state_dim)
-        print(self.action_dim)
         self.model = nn.Sequential(nn.Linear(self.state_dim,32),
                                 nn.ReLU(),
                                 nn.Linear(32,self.action_dim))
@@ -91,7 +89,7 @@ class DQN(nn.Module):
             self.epsilon *= EPS_DECAY
 
     def action(self,state):
-        return self.forward(Variable(state)).detach().data.max(1)[1].cpu()
+        return self.forward(Variable(state)).detach().data.max(1)[1]
 
     def loss(self):
         if len(self.memory) < BATCH_SIZE:
