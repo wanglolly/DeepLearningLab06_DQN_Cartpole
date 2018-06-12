@@ -173,7 +173,8 @@ def main():
                     param.grad.data.clamp_(-1, 1)
                 optimizer.step()
             if done:
-                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
+                if loss is not None:
+                    print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
                 break
         header = [episode, total_reward, str(float(loss.data[0].cpu()))]
         recordCursor.writerow(header)
