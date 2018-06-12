@@ -176,8 +176,9 @@ def main():
                 if loss is not None:
                     print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
                 break
-        header = [episode, total_reward, str(float(loss.data[0].cpu()))]
-        recordCursor.writerow(header)
+        if loss is not None:
+            header = [episode, total_reward, str(float(loss.data[0].cpu()))]
+            recordCursor.writerow(header)
 
         if(episode + 1) % TARGETQ_UPDATE == 0:
             dqn.updateTargetModel()
