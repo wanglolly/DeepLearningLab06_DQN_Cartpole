@@ -98,7 +98,7 @@ class DQN(nn.Module):
             return self.action(state)
         
     def action(self,state):
-        return self.forward(Variable(state)).detach().data.max(1)[1].view(1, 1).cpu()
+        return self.forward(Variable(state)).detach().data.max(1)[1].view(1, 1)
 
     def loss(self):
         if len(self.memory) < BATCH_SIZE:
@@ -166,9 +166,6 @@ def main():
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
-            print(len(dqn.memory))
-            if loss is None:
-                continue
             optimizer.zero_grad()
             loss.backward()
             for param in dqn.model.parameters():
