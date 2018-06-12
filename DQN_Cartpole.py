@@ -141,11 +141,11 @@ def main():
             action = dqn.egreedy_action(state)
             next_state,reward,done,_ = env.step(int(action[0].data[0].cpu()))
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
+            total_reward += reward
             reward = torch.Tensor([reward])
             final = torch.LongTensor([done])
             dqn.push(state,action,next_state,reward,final)
             state = next_state
-            total_reward += reward
             totalSteps += 1
             optimizer.zero_grad()
             loss = dqn.loss()
@@ -155,10 +155,10 @@ def main():
             optimizer.step()
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
-                print(str(episode) + "\t" + str(t) + "\t" + str(float(reward.data[0].cpu())))
+                print(str(episode) + "\t" + str(t) + "\t" + str(total_reward))
             if done:
                 break
-        header = [episode, totalSteps, float(total_reward.data[0].cpu()), float(total_reward.data[0].cpu()) / totalSteps]
+        header = [episode, totalSteps, total_reward, total_reward / totalSteps]
         recordCursor.writerow(header)
 
         if episode % 100 == 0:
