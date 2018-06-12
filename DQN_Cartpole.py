@@ -93,9 +93,9 @@ class DQN(nn.Module):
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
         if random.random() > self.epsilon:
-            print(str(steps_done) + '\taciton')
             return self.action(state)
         else:
+            print(str(steps_done) + '\trandom')
             return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
