@@ -111,7 +111,7 @@ class DQN(nn.Module):
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
-        state_action_values = self.forward(state_batch).gather(1, action_batch)
+        state_action_values = self.forward(state_batch).gather(1, action_batch.view(-1, 1))
         # Compute V(s_{t+1}) for all next states.
         next_state_values = Variable(torch.zeros(BATCH_SIZE))
         next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
@@ -119,7 +119,7 @@ class DQN(nn.Module):
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
         expected_state_action_values = Variable(expected_state_action_values.data)
-        
+
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
         loss = Variable(loss, requires_grad = True)
