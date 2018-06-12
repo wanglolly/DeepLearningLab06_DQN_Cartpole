@@ -92,10 +92,10 @@ class DQN(nn.Module):
         if self.epsilon >= EPS_END:
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
-        if random.random() <= self.epsilon:
-            return LongTensor([[random.randrange(self.action_dim)]])
-        else:
+        if random.random() > self.epsilon:
             return self.action(state)
+        else:
+            return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
         return self.forward(Variable(state)).detach().data.max(1)[1].view(1, 1)
@@ -119,7 +119,7 @@ class DQN(nn.Module):
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
-        state_action_values = self.forward(state_batch).gather(1, action_batch.view(-1, 1))
+        state_action_values = self.forward(state_batch).gather(1, action_batch)
         # Compute V(s_{t+1}) for all next states.
         next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor))
         next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
@@ -161,8 +161,8 @@ def main():
             next_state,reward,done,_ = env.step(int(action[0,0].data[0]))
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             total_reward += reward
-            reward = torch.Tensor([reward])
-            final = torch.LongTensor([done])
+            reward = Tensor([reward])
+            final = LongTensor([done])
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
