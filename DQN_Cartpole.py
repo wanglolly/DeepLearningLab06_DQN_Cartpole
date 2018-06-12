@@ -131,7 +131,7 @@ class DQN(nn.Module):
         #loss = F.smooth_l1_loss(torch.squeeze(state_action_values), expected_state_action_values)
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
-        loss = Variable(loss, requires_grad = True)
+        #loss = Variable(loss, requires_grad = True)
         return loss
 
     def push(self, state, action, next_state, reward, done):
