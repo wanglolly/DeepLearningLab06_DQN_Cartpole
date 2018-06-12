@@ -155,6 +155,7 @@ def main():
             optimizer.step()
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
+                print(str(t) + "\t" + str(reward))
             if done:
                 break
         header = [episode, totalSteps, total_reward.data[0].cpu(), total_reward[0].cpu() / totalSteps]
@@ -176,19 +177,6 @@ def main():
             avg_reward = total_reward / TEST
             print('Episode: {} Evaluation Average Reward: {}'.format(episode, avg_reward))
 
-    #env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
-    #for i in range(100):
-    #    state = env.reset()
-    #    state = torch.from_numpy(state.reshape((-1, 4))).float()
-    #    for j in range(STEP):
-    #        env.render()
-    #        action = dqn.action(state)
-    #        state, reward, done, _ = env.step(action[0, 0])
-    #        state = torch.from_numpy(state.reshape((-1, 4))).float()
-    #        total_reward += reward
-    #        if done:
-    #            break
-    #env.close()
     dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 if __name__ == '__main__':
     main()
