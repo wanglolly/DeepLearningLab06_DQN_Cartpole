@@ -120,9 +120,10 @@ class DQN(nn.Module):
         # Undo volatility (which was used to prevent unnecessary gradients)
         expected_state_action_values = Variable(expected_state_action_values.data)
 
-        loss = nn.MSELoss()
-        loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
-        loss = Variable(loss, requires_grad = True)
+        loss = F.smooth_l1_loss(state_action_values, expected_state_action_values)
+        #loss = nn.MSELoss()
+        #loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
+        #loss = Variable(loss, requires_grad = True)
         return loss
 
     def push(self, state, action, next_state, reward, done):
