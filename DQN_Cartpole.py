@@ -8,8 +8,14 @@ import torch.optim as optim
 import gym
 from gym import wrappers
 import csv
+import math
 
-torch.set_default_tensor_type('torch.FloatTensor')
+# if gpu is to be used
+use_cuda = torch.cuda.is_available()
+FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
+LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
+ByteTensor = torch.cuda.ByteTensor if use_cuda else torch.ByteTensor
+Tensor = FloatTensor
 
 GAMMA = 0.95
 EPS_START = 1.0
@@ -21,14 +27,14 @@ TARGETQ_UPDATE = 50
 num_episodes = 1000
 STEP = 300
 TEST = 10
-USE_CUDA = True
+steps_done = 0
 
 recordFileName = './DQN_Reward.csv'
 recordFile = open(recordFileName, 'w')
 recordCursor = csv.writer(recordFile)
 
 def Variable(data, *args, **kwargs):
-    if USE_CUDA:
+    if use_cuda:
         data = data.cuda()
     return autograd.Variable(data,*args, **kwargs)
 
@@ -82,13 +88,15 @@ class DQN(nn.Module):
 
     #epsilon greedy policy to select action
     def egreedy_action(self,state):
+        global steps_done
+        if self.epsilon >= EPS_END:
+            self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
+        steps_done += 1
         if random.random() <= self.epsilon:
             return torch.LongTensor([random.randrange(self.action_dim)])
         else:
             return self.action(state)
-        if self.epsilon >= EPS_END:
-            self.epsilon *= EPS_DECAY
-
+        
     def action(self,state):
         return self.forward(Variable(state)).detach().data.max(1)[1].cpu()
 
@@ -99,7 +107,7 @@ class DQN(nn.Module):
         minibatch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
-        non_final_mask = torch.ByteTensor(tuple(map(lambda s: s is not None,
+        non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
         non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
                                                 if s is not None]),
@@ -140,7 +148,7 @@ def main():
     env = gym.make('CartPole-v0')
     memory = ReplayMemory(REPLAY_SIZE)
     dqn = DQN(env,memory)
-    if USE_CUDA:
+    if use_cuda:
         dqn.cuda()
     optimizer = optim.Adam(dqn.parameters(),0.0005)
     for episode in range(num_episodes):
@@ -167,7 +175,7 @@ def main():
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
             if done:
-                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
+                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(loss.data) + "\tReward: " + str(total_reward))
                 break
         header = [episode, totalSteps, total_reward, str(float(loss.data[0].cpu()))]
         recordCursor.writerow(header)
