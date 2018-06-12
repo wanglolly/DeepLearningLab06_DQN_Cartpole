@@ -165,15 +165,16 @@ def main():
             final = torch.LongTensor([done])
             dqn.push(state,action,next_state,reward,final)
             state = next_state
+            if done:
+                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
+                break
             loss = dqn.loss()
             optimizer.zero_grad()
             loss.backward()
             for param in dqn.model.parameters():
                 param.grad.data.clamp_(-1, 1)
             optimizer.step()
-            if done:
-                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
-                break
+            
         header = [episode, total_reward, str(float(loss.data[0].cpu()))]
         recordCursor.writerow(header)
 
