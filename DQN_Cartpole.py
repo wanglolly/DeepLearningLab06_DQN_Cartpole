@@ -169,8 +169,8 @@ def main():
             if loss is not None:
                 optimizer.zero_grad()
                 loss.backward()
-                for param in dqn.model.parameters():
-                    param.grad.data.clamp_(-1, 1)
+                #for param in dqn.model.parameters():
+                #    param.grad.data.clamp_(-1, 1)
                 optimizer.step()
             #if t % TARGETQ_UPDATE == 0:
             #    dqn.updateTargetModel()
