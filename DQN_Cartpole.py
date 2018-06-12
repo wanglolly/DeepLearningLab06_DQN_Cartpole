@@ -155,7 +155,7 @@ def main():
             optimizer.step()
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
-                print(str(t) + "\t" + str(reward))
+                print(str(episode) + "\t" + str(t) + "\t" + str(reward.cpu()))
             if done:
                 break
         header = [episode, totalSteps, total_reward.data[0].cpu(), total_reward[0].cpu() / totalSteps]
