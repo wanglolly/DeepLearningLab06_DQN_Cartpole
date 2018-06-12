@@ -156,12 +156,12 @@ def main():
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
             if done:
-                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())))
+                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + total_reward/totalSteps)
                 break
         header = [episode, totalSteps, total_reward, total_reward / totalSteps]
         recordCursor.writerow(header)
 
-        if episode % 100 == 0:
+        if (episode + 1) % 100 == 0:
             total_reward = 0
             for i in range(TEST):
                 state = env.reset()
@@ -175,7 +175,7 @@ def main():
                     if done:
                         break
             avg_reward = total_reward / TEST
-            print('Episode: {} Evaluation Average Reward: {}'.format(episode, avg_reward))
+            print('Episode: {} Evaluation Average Reward: {}'.format(episode + 1, avg_reward))
 
     dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
 if __name__ == '__main__':
