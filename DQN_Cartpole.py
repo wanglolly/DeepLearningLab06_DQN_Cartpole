@@ -155,10 +155,10 @@ def main():
             optimizer.step()
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
-                print(str(episode) + "\t" + str(t) + "\t" + str(reward.data[0].cpu()))
+                print(str(episode) + "\t" + str(t) + "\t" + str(float(reward.data[0].cpu())))
             if done:
                 break
-        header = [episode, totalSteps, total_reward.data[0].cpu(), total_reward.data[0].cpu() / totalSteps]
+        header = [episode, totalSteps, float(total_reward.data[0].cpu()), float(total_reward.data[0].cpu()) / totalSteps]
         recordCursor.writerow(header)
 
         if episode % 100 == 0:
