@@ -19,7 +19,7 @@ REPLAY_SIZE = 5000
 BATCH_SIZE = 128
 TARGETQ_UPDATE = 50
 num_episodes = 1000
-STEP = 200
+STEP = 300
 TEST = 10
 USE_CUDA = True
 
@@ -68,6 +68,7 @@ class DQN(nn.Module):
                                 nn.ReLU(),
                                 nn.Linear(32,self.action_dim))
         self.updateTargetModel()
+        self.targetModel.eval()
 
     def forward(self,x):
         return self.model(x)
@@ -97,19 +98,28 @@ class DQN(nn.Module):
         transitions = self.memory.sample(BATCH_SIZE)
         minibatch = Transition(*zip(*transitions))
 
+        # Compute a mask of non-final states and concatenate the batch elements
+        non_final_mask = torch.ByteTensor(tuple(map(lambda s: s is not None,
+                                          minibatch.next_state)))
+        non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
+                                                if s is not None]),
+                                     volatile=True)
+
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
         reward_batch = Variable(torch.cat(minibatch.reward))
-        done_batch = Variable(torch.cat(minibatch.done))
 
-        #Q(s,a,theta)
-        state_action_values = self.forward(state_batch).max(1)[0].detach()
+        # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
+        # columns of actions taken
+        state_action_values = self.forward(state_batch).gather(1, action_batch)
+        # Compute V(s_{t+1}) for all next states.
         next_state_values = Variable(torch.zeros(BATCH_SIZE))
-        non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
-
-        #max Q(s',a',theta),if s' is a terminal state,return 0
-        next_state_values[done_batch == 0] = self.target_forward(non_final_next_states).max(1)[0].detach()
+        next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
+        # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
+        # Undo volatility (which was used to prevent unnecessary gradients)
+        expected_state_action_values = Variable(expected_state_action_values.data)
+        
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
         loss = Variable(loss, requires_grad = True)
