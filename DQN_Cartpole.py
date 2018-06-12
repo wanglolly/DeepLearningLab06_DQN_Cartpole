@@ -149,7 +149,6 @@ def main():
             totalSteps += 1
             optimizer.zero_grad()
             loss = dqn.loss()
-            print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(loss))
             if loss is None:
                 continue
             loss.backward()
@@ -157,6 +156,7 @@ def main():
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
             if done:
+                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())))
                 break
         header = [episode, totalSteps, total_reward, total_reward / totalSteps]
         recordCursor.writerow(header)
