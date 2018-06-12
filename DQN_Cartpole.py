@@ -149,13 +149,13 @@ def main():
             totalSteps += 1
             optimizer.zero_grad()
             loss = dqn.loss()
+            print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(loss))
             if loss is None:
                 continue
             loss.backward()
             optimizer.step()
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
-                print(str(episode) + "\t" + str(t) + "\t" + str(total_reward))
             if done:
                 break
         header = [episode, totalSteps, total_reward, total_reward / totalSteps]
