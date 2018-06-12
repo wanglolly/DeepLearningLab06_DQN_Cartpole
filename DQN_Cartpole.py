@@ -175,7 +175,7 @@ def main():
             if t % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
             if done:
-                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(loss.data) + "\tReward: " + str(total_reward))
+                print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
                 break
         header = [episode, totalSteps, total_reward, str(float(loss.data[0].cpu()))]
         recordCursor.writerow(header)
