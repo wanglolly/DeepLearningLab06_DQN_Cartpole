@@ -93,12 +93,12 @@ class DQN(nn.Module):
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
         if random.random() <= self.epsilon:
-            return torch.LongTensor([random.randrange(self.action_dim)])
+            return LongTensor([random.randrange(self.action_dim)])
         else:
             return self.action(state)
         
     def action(self,state):
-        return self.forward(Variable(state)).detach().data.max(1)[1].cpu()
+        return self.forward(Variable(state)).detach().data.max(1)[1].view(1, 1)
 
     def loss(self):
         if len(self.memory) < BATCH_SIZE:
@@ -121,7 +121,7 @@ class DQN(nn.Module):
         # columns of actions taken
         state_action_values = self.forward(state_batch).gather(1, action_batch.view(-1, 1))
         # Compute V(s_{t+1}) for all next states.
-        next_state_values = Variable(torch.zeros(BATCH_SIZE))
+        next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor))
         next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
@@ -149,7 +149,8 @@ def main():
     memory = ReplayMemory(REPLAY_SIZE)
     dqn = DQN(env,memory)
     if use_cuda:
-        dqn.cuda()
+        dqn.model.cuda()
+        dqn.targetModel.cuda()
     optimizer = optim.RMSprop(dqn.model.parameters(),0.0005)
     for episode in range(num_episodes):
         state = env.reset()
@@ -157,7 +158,7 @@ def main():
         total_reward = 0
         for t in range(STEP):
             action = dqn.egreedy_action(state)
-            next_state,reward,done,_ = env.step(int(action[0].data[0].cpu()))
+            next_state,reward,done,_ = env.step(action[0,0])
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             total_reward += reward
             reward = torch.Tensor([reward])
@@ -165,6 +166,7 @@ def main():
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
+            print(len(dqn.memory))
             if loss is None:
                 continue
             optimizer.zero_grad()
@@ -189,7 +191,7 @@ def main():
                 for j in range(STEP):
                     #env.render()
                     action = dqn.action(state)
-                    state,reward,done,_ = env.step(int(action[0].data[0].cpu()))
+                    state,reward,done,_ = env.step(action[0,0])
                     state = torch.from_numpy(state.reshape((-1, 4))).float()
                     total_reward += reward
                     if done:
