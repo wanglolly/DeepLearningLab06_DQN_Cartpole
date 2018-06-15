@@ -26,7 +26,7 @@ BATCH_SIZE = 128
 TARGETQ_UPDATE = 50
 num_episodes = 1000
 STEP = 300
-TEST = 10
+TEST = 100
 steps_done = 0
 
 recordFileName = './DQN_Reward.csv'
