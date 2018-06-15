@@ -152,6 +152,7 @@ def main():
         dqn.model.cuda()
         dqn.targetModel.cuda()
     optimizer = optim.RMSprop(dqn.model.parameters(),0.0005)
+    total_steps = 0
     for episode in range(num_episodes):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1,4))).float()
@@ -166,14 +167,15 @@ def main():
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
+            total_steps += 1
             if loss is not None:
                 optimizer.zero_grad()
                 loss.backward()
                 #for param in dqn.model.parameters():
                 #    param.grad.data.clamp_(-1, 1)
                 optimizer.step()
-            #if t % TARGETQ_UPDATE == 0:
-            #    dqn.updateTargetModel()
+            if total_steps % TARGETQ_UPDATE == 0:
+                dqn.updateTargetModel()
             if done:
                 if loss is not None:
                     print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
@@ -182,8 +184,8 @@ def main():
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
 
-        if(episode + 1) % TARGETQ_UPDATE == 0:
-            dqn.updateTargetModel()
+        #if(episode + 1) % TARGETQ_UPDATE == 0:
+        #    dqn.updateTargetModel()
 
         if (episode + 1) % 100 == 0:
             total_reward = 0
