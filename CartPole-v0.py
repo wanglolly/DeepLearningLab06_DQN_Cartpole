@@ -108,7 +108,7 @@ def main():
         state = torch.from_numpy(state.reshape((-1,4))).float()
         for t in range(STEP):
             action = dqn.egreedy_action(state)
-            next_state,reward,done,_ = env.step(action[0,0])
+            next_state,reward,done,_ = env.step(int(action[0,0].data[0]))
             next_state = torch.from_numpy(next_state.reshape((-1,4))).float()
             reward = torch.Tensor([reward])
             final = torch.LongTensor([done])
@@ -131,7 +131,7 @@ def main():
                 for j in range(STEP):
                     env.render()
                     action = dqn.action(state)
-                    state,reward,done,_ = env.step(action[0,0])
+                    state,reward,done,_ = env.step(int(action[0,0].data[0]))
                     state = torch.from_numpy(state.reshape((-1, 4))).float()
                     total_reward += reward
                     if done:
@@ -142,7 +142,7 @@ def main():
                 break
 
     env = wrappers.Monitor(env,'CartPole-v0-experiment-1')
-    for i in xrange(100):
+    for i in range(100):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1, 4))).float()
         for j in range(STEP):
