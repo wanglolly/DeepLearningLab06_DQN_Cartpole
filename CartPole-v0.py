@@ -137,7 +137,7 @@ def main():
                     if done:
                         break
             avg_reward = total_reward / TEST
-            print 'episode: ' ,episode,' Evaluation Average Reward: ',avg_reward
+            print ('episode: ' + str(episode) +' Evaluation Average Reward: ' + str(avg_reward))
             if avg_reward >= 200.0:
                 break
 
