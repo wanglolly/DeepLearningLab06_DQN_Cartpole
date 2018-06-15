@@ -172,8 +172,8 @@ def main():
                 #for param in dqn.model.parameters():
                 #    param.grad.data.clamp_(-1, 1)
                 optimizer.step()
-            if total_steps % TARGETQ_UPDATE == 0:
-                dqn.updateTargetModel()
+            #if total_steps % TARGETQ_UPDATE == 0:
+            #    dqn.updateTargetModel()
             if done:
                 if loss is not None:
                     print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
@@ -182,8 +182,8 @@ def main():
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
 
-        #if(episode + 1) % TARGETQ_UPDATE == 0:
-        #    dqn.updateTargetModel()
+        if(episode + 1) % TARGETQ_UPDATE == 0:
+            dqn.updateTargetModel()
 
         if (episode + 1) % 100 == 0:
             total_reward = 0
