@@ -110,8 +110,7 @@ class DQN(nn.Module):
         non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
         non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                if s is not None]),
-                                     volatile=True)
+                                                if s is not None]),volatile=True)
 
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
@@ -121,17 +120,16 @@ class DQN(nn.Module):
         # columns of actions taken
         state_action_values = self.forward(state_batch).gather(1, action_batch)
         # Compute V(s_{t+1}) for all next states.
-        next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor))
+        next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor),volatile=True)
         next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
-        expected_state_action_values = Variable(expected_state_action_values.data)
+        expected_state_action_values = Variable(expected_state_action_values.data,volatile=False)
 
         #loss = F.smooth_l1_loss(torch.squeeze(state_action_values), expected_state_action_values)
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
-        #loss = Variable(loss, requires_grad = True)
         return loss
 
     def push(self, state, action, next_state, reward, done):
