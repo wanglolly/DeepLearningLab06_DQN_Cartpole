@@ -23,7 +23,7 @@ EPS_END = 0.01
 EPS_DECAY = 0.995
 REPLAY_SIZE = 5000
 BATCH_SIZE = 128
-TARGETQ_UPDATE = 5
+TARGETQ_UPDATE = 50
 num_episodes = 1000
 STEP = 300
 TEST = 100
@@ -150,7 +150,6 @@ def main():
         dqn.model.cuda()
         dqn.targetModel.cuda()
     optimizer = optim.RMSprop(dqn.model.parameters(),0.0005)
-    total_steps = 0
     for episode in range(num_episodes):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1,4))).float()
@@ -165,14 +164,13 @@ def main():
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
-            total_steps += 1
             if loss is not None:
                 optimizer.zero_grad()
                 loss.backward()
                 for param in dqn.model.parameters():
                     param.grad.data.clamp_(-1, 1)
                 optimizer.step()
-            if total_steps % TARGETQ_UPDATE == 0:
+            if steps_done % TARGETQ_UPDATE == 0:
                 dqn.updateTargetModel()
             if done:
                 if loss is not None:
