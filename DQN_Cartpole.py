@@ -121,7 +121,7 @@ class DQN(nn.Module):
         state_action_values = self.forward(state_batch).gather(1, action_batch)
         # Compute V(s_{t+1}) for all next states.
         next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor),volatile=True)
-        next_state_values[non_final_mask] = self.forward(non_final_next_states).max(1)[0]
+        next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
@@ -169,8 +169,8 @@ def main():
             if loss is not None:
                 optimizer.zero_grad()
                 loss.backward()
-                #for param in dqn.model.parameters():
-                #    param.grad.data.clamp_(-1, 1)
+                for param in dqn.model.parameters():
+                    param.grad.data.clamp_(-1, 1)
                 optimizer.step()
             #if total_steps % TARGETQ_UPDATE == 0:
             #    dqn.updateTargetModel()
