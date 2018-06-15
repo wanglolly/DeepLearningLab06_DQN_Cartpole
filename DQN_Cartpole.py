@@ -149,7 +149,7 @@ def main():
     if use_cuda:
         dqn.model.cuda()
         dqn.targetModel.cuda()
-    optimizer = optim.RMSprop(dqn.model.parameters(),0.0005)
+    optimizer = optim.Adam(dqn.model.parameters(),0.0005)
     for episode in range(num_episodes):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1,4))).float()
