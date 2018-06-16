@@ -92,7 +92,7 @@ class DQN(nn.Module):
         if self.epsilon >= EPS_END:
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
-        print("Epislon: " + str(self.epsilon) + " steps: " + steps_done)
+        print("Epislon: " + str(self.epsilon) + " steps: " + str(steps_done))
         if random.random() > self.epsilon:
             return self.action(state)
         else:
