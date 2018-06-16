@@ -93,7 +93,7 @@ class DQN(nn.Module):
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
         if random.random() > self.epsilon:
-            return LongTensor(self.action(state))
+            return self.action(state)
         else:
             return LongTensor([[random.randrange(self.action_dim)]])
         
@@ -161,6 +161,7 @@ def main():
             total_reward += reward
             reward = Tensor([reward])
             final = LongTensor([done])
+            action = LongTensor(action[0,0].data[0])
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
