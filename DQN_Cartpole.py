@@ -177,6 +177,9 @@ def main():
         if loss is not None:
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
+        else:
+            header = [episode, total_reward, 0]
+            recordCursor.writerow(header)
 
         if (episode + 1) % 100 == 0:
             total_reward = 0
