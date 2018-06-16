@@ -168,7 +168,7 @@ def main():
             total_reward += reward
             if done:
                 print('Episode: {} Evaluation Reward: {}'.format(i + 1, episode_reward))
-                header = [episode, episode_reward]
+                header = [i + 1, episode_reward]
                 recordCursor.writerow(header)
                 break
     avg_reward = total_reward / num_episodes
