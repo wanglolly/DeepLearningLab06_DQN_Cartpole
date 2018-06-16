@@ -163,8 +163,8 @@ def main():
             if done:
                 print('Episode: {} Evaluation Reward: {}'.format(i + 1, episode_reward))
                 break
-        avg_reward = total_reward / num_episodes
-        print('Average Reward: {}'.format(avg_reward))
+    avg_reward = total_reward / num_episodes
+    print('Average Reward: {}'.format(avg_reward))
 
 if __name__ == '__main__':
     main()
