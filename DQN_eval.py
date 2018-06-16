@@ -42,6 +42,12 @@ def Variable(data, *args, **kwargs):
 
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward','done'))
+
+                        
+recordFileName = './DQN_eval.csv'
+recordFile = open(recordFileName, 'w')
+recordCursor = csv.writer(recordFile)
+
 #experience replay
 class ReplayMemory(object):
     def __init__(self, capacity):
@@ -162,6 +168,8 @@ def main():
             total_reward += reward
             if done:
                 print('Episode: {} Evaluation Reward: {}'.format(i + 1, episode_reward))
+                header = [episode, episode_reward]
+                recordCursor.writerow(header)
                 break
     avg_reward = total_reward / num_episodes
     print('Average Reward: {}'.format(avg_reward))
