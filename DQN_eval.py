@@ -145,7 +145,7 @@ def main():
     dqn = DQN(env,memory)
     dqn.loadModel(args.model)
     total_reward = 0
-    
+
     if use_cuda:
         dqn.model.cuda()
         dqn.targetModel.cuda()
@@ -153,13 +153,15 @@ def main():
     for i in range(num_episodes):
         state = env.reset()
         state = torch.from_numpy(state.reshape((-1, 4))).float()
+        episode_reward = 0
         for j in range(STEP):
             action = dqn.action(state)
             state,reward,done,_ = env.step(int(action[0,0].data[0]))
             state = torch.from_numpy(state.reshape((-1, 4))).float()
+            episode_reward += reward
             total_reward += reward
             if done:
-                print('Episode: {} Evaluation Reward: {}'.format(i + 1, total_reward))
+                print('Episode: {} Evaluation Reward: {}'.format(i + 1, episode_reward))
                 break
         avg_reward = total_reward / num_episodes
         print('Average Reward: {}'.format(avg_reward))
