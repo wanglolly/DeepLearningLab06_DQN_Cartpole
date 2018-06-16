@@ -161,7 +161,7 @@ def main():
             total_reward += reward
             reward = Tensor([reward])
             final = LongTensor([done])
-            action = LongTensor([action[0,0].data[0]])
+            action = LongTensor(action)
             dqn.push(state,action,next_state,reward,final)
             state = next_state
             loss = dqn.loss()
