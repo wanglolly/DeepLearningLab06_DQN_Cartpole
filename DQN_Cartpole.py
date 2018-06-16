@@ -25,7 +25,7 @@ REPLAY_SIZE = 5000
 BATCH_SIZE = 128
 TARGETQ_UPDATE = 50
 num_episodes = 1000
-STEP = 300
+STEP = 500
 TEST = 100
 steps_done = 0
 
@@ -106,12 +106,6 @@ class DQN(nn.Module):
         transitions = self.memory.sample(BATCH_SIZE)
         minibatch = Transition(*zip(*transitions))
 
-        # Compute a mask of non-final states and concatenate the batch elements
-        #non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
-                                          #minibatch.next_state)))
-        #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                #if s is not None]),volatile=True)
-
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
         reward_batch = Variable(torch.cat(minibatch.reward))
@@ -124,7 +118,6 @@ class DQN(nn.Module):
         next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor),volatile=True)
         non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
         next_state_values[done_batch == 0] = self.forward(non_final_next_states).max(1)[0].detach()
-        #next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
