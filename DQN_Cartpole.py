@@ -107,21 +107,24 @@ class DQN(nn.Module):
         minibatch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
-        non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
+        #non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
-        non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
+        #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
                                                 if s is not None]),volatile=True)
 
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
         reward_batch = Variable(torch.cat(minibatch.reward))
+        done_batch = Variable(torch.cat(minibatch.done))
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
         state_action_values = self.forward(state_batch).gather(1, action_batch)
         # Compute V(s_{t+1}) for all next states.
         next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor),volatile=True)
-        next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
+        non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
+        next_state_values[done_batch == 0] = self.forward(non_final_next_states).max(1)[0].detach()
+        #next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
@@ -170,8 +173,8 @@ def main():
                 for param in dqn.model.parameters():
                     param.grad.data.clamp_(-1, 1)
                 optimizer.step()
-            #if steps_done % TARGETQ_UPDATE == 0:
-            #    dqn.updateTargetModel()
+            if steps_done % TARGETQ_UPDATE == 0:
+                dqn.updateTargetModel()
             if done:
                 if loss is not None:
                     print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
@@ -180,8 +183,8 @@ def main():
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
 
-        if(episode + 1) % TARGETQ_UPDATE == 0:
-            dqn.updateTargetModel()
+        #if(episode + 1) % TARGETQ_UPDATE == 0:
+        #    dqn.updateTargetModel()
 
         if (episode + 1) % 100 == 0:
             total_reward = 0
