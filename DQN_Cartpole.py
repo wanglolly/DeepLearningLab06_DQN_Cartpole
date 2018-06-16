@@ -95,7 +95,6 @@ class DQN(nn.Module):
         if random.random() > self.epsilon:
             return self.action(state)
         else:
-            print(str(self.epsilon))
             return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
@@ -110,8 +109,8 @@ class DQN(nn.Module):
         # Compute a mask of non-final states and concatenate the batch elements
         non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
-        non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                if s is not None]),volatile=True)
+        non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))
+
 
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
