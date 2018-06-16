@@ -93,9 +93,9 @@ class DQN(nn.Module):
             self.epsilon *= EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
         steps_done += 1
         if random.random() > self.epsilon:
-            return self.action(state)
+            return LongTensor(self.action(state))
         else:
-            return FloatTensor([[random.randrange(self.action_dim)]])
+            return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
         return self.forward(Variable(state)).detach().data.max(1)[0].view(1, 1)
