@@ -98,7 +98,7 @@ class DQN(nn.Module):
             return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
-        return self.forward(Variable(state)).detach().data.max(1)[1].view(1, 1)
+        return self.forward(Variable(state)).detach().data.max(1)[0].view(1, 1)
 
     def loss(self):
         if len(self.memory) < BATCH_SIZE:
