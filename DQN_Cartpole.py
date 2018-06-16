@@ -114,8 +114,9 @@ class DQN(nn.Module):
         # Compute a mask of non-final states and concatenate the batch elements
         non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
-        non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
+        #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
                                                 if s is not None]),volatile=True)
+        non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))                                       
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
@@ -124,7 +125,7 @@ class DQN(nn.Module):
         next_state_values = Variable(torch.zeros(BATCH_SIZE).type(Tensor),volatile=True)
         next_state_values[non_final_mask] = self.target_forward(non_final_next_states).max(1)[0]
         # Compute the expected Q values
-        expected_state_action_values = (non_final_next_states * GAMMA) + reward_batch
+        expected_state_action_values = (next_state_values * GAMMA) + reward_batch
         # Undo volatility (which was used to prevent unnecessary gradients)
         expected_state_action_values = Variable(expected_state_action_values.data,volatile=False)
 
