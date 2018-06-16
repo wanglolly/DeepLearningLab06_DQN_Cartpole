@@ -44,7 +44,7 @@ Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward','done'))
 
                         
-recordFileName = './DQN_eval.csv'
+recordFileName = './DQN_eval2.csv'
 recordFile = open(recordFileName, 'w')
 recordCursor = csv.writer(recordFile)
 
