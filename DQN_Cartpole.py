@@ -192,7 +192,7 @@ def main():
                         break
             avg_reward = total_reward / TEST
             print('Episode: {} Evaluation Average Reward: {}'.format(episode + 1, avg_reward))
-            if avg_reward > best_testReward:
+            if avg_reward >= best_testReward:
                 print('Save best model on episode {}'.format(episode + 1))
                 dqn.saveModel('Models/DQN_best.tar')
                 best_testReward = avg_reward
