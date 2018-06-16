@@ -108,9 +108,9 @@ class DQN(nn.Module):
 
         # Compute a mask of non-final states and concatenate the batch elements
         #non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
-                                          minibatch.next_state)))
+                                          #minibatch.next_state)))
         #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                if s is not None]),volatile=True)
+                                                #if s is not None]),volatile=True)
 
         state_batch = Variable(torch.cat(minibatch.state))
         action_batch = Variable(torch.cat(minibatch.action))
