@@ -104,19 +104,17 @@ class DQN(nn.Module):
         if len(self.memory) < BATCH_SIZE:
             return
         transitions = self.memory.sample(BATCH_SIZE)
-        minibatch = Transition(*zip(*transitions))     
-
-        state_batch = Variable(torch.cat(minibatch.state))
-        action_batch = Variable(torch.cat(minibatch.action))
-        reward_batch = Variable(torch.cat(minibatch.reward))
-        done_batch = Variable(torch.cat(minibatch.done))
+        minibatch = Transition(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
         non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
-        #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                #if s is not None]),volatile=True)
-        non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))                                       
+        non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
+                                                if s is not None]),volatile=True)
+
+        state_batch = Variable(torch.cat(minibatch.state))
+        action_batch = Variable(torch.cat(minibatch.action))
+        reward_batch = Variable(torch.cat(minibatch.reward))
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
         # columns of actions taken
