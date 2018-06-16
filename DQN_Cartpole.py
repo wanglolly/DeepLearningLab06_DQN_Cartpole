@@ -115,7 +115,7 @@ class DQN(nn.Module):
         non_final_mask = ByteTensor(tuple(map(lambda s: s is not None,
                                           minibatch.next_state)))
         #non_final_next_states = Variable(torch.cat([s for s in minibatch.next_state
-                                                if s is not None]),volatile=True)
+                                                #if s is not None]),volatile=True)
         non_final_next_states = Variable(torch.cat([s for t,s in enumerate(minibatch.next_state) if done_batch[t]==0]))                                       
 
         # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
