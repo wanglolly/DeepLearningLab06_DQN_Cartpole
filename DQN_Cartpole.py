@@ -92,9 +92,10 @@ class DQN(nn.Module):
         if self.epsilon >= EPS_END:
             self.epsilon *= EPS_DECAY
         steps_done += 1
-        if random.random() > self.epsilon:
+        if random.random() <= self.epsilon:
             return self.action(state)
         else:
+            print("random")
             return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
