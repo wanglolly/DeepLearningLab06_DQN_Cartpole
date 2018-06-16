@@ -9,6 +9,7 @@ import gym
 from gym import wrappers
 import csv
 import math
+import argparse
 
 # if gpu is to be used
 use_cuda = torch.cuda.is_available()
@@ -25,11 +26,11 @@ REPLAY_SIZE = 5000
 BATCH_SIZE = 128
 TARGETQ_UPDATE = 50
 num_episodes = 1000
-STEP = 500
+STEP = 250 #Max : 200
 TEST = 100
 steps_done = 0
 
-recordFileName = './DQN_Reward.csv'
+recordFileName = './DQN_train.csv'
 recordFile = open(recordFileName, 'w')
 recordCursor = csv.writer(recordFile)
 
@@ -141,6 +142,7 @@ def main():
     env = gym.make('CartPole-v0')
     memory = ReplayMemory(REPLAY_SIZE)
     dqn = DQN(env,memory)
+    best_testReward = 0
     if use_cuda:
         dqn.model.cuda()
         dqn.targetModel.cuda()
@@ -176,16 +178,12 @@ def main():
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
 
-        #if(episode + 1) % TARGETQ_UPDATE == 0:
-        #    dqn.updateTargetModel()
-
         if (episode + 1) % 100 == 0:
             total_reward = 0
             for i in range(TEST):
                 state = env.reset()
                 state = torch.from_numpy(state.reshape((-1, 4))).float()
                 for j in range(STEP):
-                    #env.render()
                     action = dqn.action(state)
                     state,reward,done,_ = env.step(int(action[0,0].data[0]))
                     state = torch.from_numpy(state.reshape((-1, 4))).float()
@@ -194,7 +192,11 @@ def main():
                         break
             avg_reward = total_reward / TEST
             print('Episode: {} Evaluation Average Reward: {}'.format(episode + 1, avg_reward))
+            if avg_reward > best_testReward:
+                print('Save best model on episode {}'.format(episode + 1))
+                dqn.saveModel('Models/DQN_best.tar')
+                best_testReward = avg_reward
 
-    dqn.saveModel('Models/DQN_' + str(episode) + '.tar')
+    dqn.saveModel('Models/DQN_final.tar')
 if __name__ == '__main__':
     main()
