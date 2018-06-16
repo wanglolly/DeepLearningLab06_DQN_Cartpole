@@ -95,7 +95,6 @@ class DQN(nn.Module):
         if random.random() <= self.epsilon:
             return self.action(state)
         else:
-            print("random")
             return LongTensor([[random.randrange(self.action_dim)]])
         
     def action(self,state):
