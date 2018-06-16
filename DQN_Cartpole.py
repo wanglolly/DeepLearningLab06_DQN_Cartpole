@@ -127,7 +127,6 @@ class DQN(nn.Module):
         # Undo volatility (which was used to prevent unnecessary gradients)
         expected_state_action_values = Variable(expected_state_action_values.data,volatile=False)
 
-        #loss = F.smooth_l1_loss(torch.squeeze(state_action_values), expected_state_action_values)
         loss = nn.MSELoss()
         loss = loss(torch.squeeze(state_action_values), expected_state_action_values)
         return loss
@@ -171,8 +170,8 @@ def main():
                 for param in dqn.model.parameters():
                     param.grad.data.clamp_(-1, 1)
                 optimizer.step()
-            if steps_done % TARGETQ_UPDATE == 0:
-                dqn.updateTargetModel()
+            #if steps_done % TARGETQ_UPDATE == 0:
+            #    dqn.updateTargetModel()
             if done:
                 if loss is not None:
                     print(str(episode) + "\tSTEP: " + str(t) + "\tLoss: " + str(float(loss.data[0].cpu())) + "\tReward: " + str(total_reward))
@@ -181,8 +180,8 @@ def main():
             header = [episode, total_reward, str(float(loss.data[0].cpu()))]
             recordCursor.writerow(header)
 
-        #if(episode + 1) % TARGETQ_UPDATE == 0:
-        #    dqn.updateTargetModel()
+        if(episode + 1) % TARGETQ_UPDATE == 0:
+            dqn.updateTargetModel()
 
         if (episode + 1) % 100 == 0:
             total_reward = 0
