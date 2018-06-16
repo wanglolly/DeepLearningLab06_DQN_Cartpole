@@ -90,7 +90,7 @@ class DQN(nn.Module):
     def egreedy_action(self,state):
         global steps_done
         if self.epsilon >= EPS_END:
-            self.epsilon = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps_done / EPS_DECAY)
+            self.epsilon *= EPS_DECAY
         steps_done += 1
         if random.random() > self.epsilon:
             return self.action(state)
